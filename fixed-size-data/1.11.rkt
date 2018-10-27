@@ -49,7 +49,7 @@
       (cond
         ((equal? (image-height x) (image-width x)) "square")
         ((> (image-height x) (image-width x)) "tall")
-        (else "wide")
+        ((< (image-height x) (image-width x)) "wide")
         )
       "input not an image")
   )
@@ -68,7 +68,7 @@
   (string-append
    (substring str 0 i)
    "_"
-   (substring str i (string-length str))
+   (substring str i)
    )
   )
 
@@ -76,7 +76,7 @@
 (define (string-delete str i)
   (string-append
    (substring str 0 (- i 1))
-   (substring str i (string-length str))
+   (substring str i)
    )
   )
               
