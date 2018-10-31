@@ -14,7 +14,7 @@
 ; expected:
 ;   "f"
 ; stub:
-;(define (string-first s)(... s ...)))
+;(define (string-first s) "")
 
 (define (string-first s)
   (substring s 0 1))
@@ -28,7 +28,7 @@
 ; expect:
 ;   "t"
 ; stub:
-; (define (string-last s)(... s ...))
+; (define (string-last s) "")
 
 (define (string-last s)
   (substring s (- (string-length s) 1)))
@@ -47,7 +47,7 @@
 ; expect:
 ;   625
 ; stub:
-; (define (image-area img)(... img ...))
+; (define (image-area img) "")
 
 (define (image-area img)
   (sqr (image-width img)))
@@ -61,7 +61,7 @@
 ; expected:
 ;   "est"
 ; stub:
-; (define (string-rest s)(... s ...))
+; (define (string-rest s) "")
 
 (define (string-rest s)
   (substring s 1))
@@ -76,7 +76,7 @@
 ;   "tes"
 ;   "miles davi"
 ; stub:
-; (define (string-remove-last s)(... s ...))
+; (define (string-remove-last s) "")
 
 (define (string-remove-last s)
   (substring s 0 (- (string-length s) 1)))
