@@ -1,3 +1,6 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname |3.2|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 ; Fixed Size Data section 3.2
 (require 2htdp/image)
 (require 2htdp/universe)
@@ -10,6 +13,9 @@
 ;   "first" for s
 ; expected:
 ;   "f"
+; stub:
+;(define (string-first s) "")
+
 (define (string-first s)
   (substring s 0 1))
 
@@ -21,6 +27,9 @@
 ;   "last" for s
 ; expect:
 ;   "t"
+; stub:
+; (define (string-last s) "")
+
 (define (string-last s)
   (substring s (- (string-length s) 1)))
 
@@ -35,8 +44,11 @@
 ;   100
 ; given:
 ;   . (square 25 "solid" "red")
-;expect:
+; expect:
 ;   625
+; stub:
+; (define (image-area img) "")
+
 (define (image-area img)
   (sqr (image-width img)))
 
@@ -48,6 +60,9 @@
 ;   "test"
 ; expected:
 ;   "est"
+; stub:
+; (define (string-rest s) "")
+
 (define (string-rest s)
   (substring s 1))
 
@@ -60,5 +75,8 @@
 ;expected:
 ;   "tes"
 ;   "miles davi"
+; stub:
+; (define (string-remove-last s) "")
+
 (define (string-remove-last s)
   (substring s 0 (- (string-length s) 1)))
