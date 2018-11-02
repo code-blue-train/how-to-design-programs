@@ -8,6 +8,7 @@
 ; intepretation is the number of pixels between
 ; the left border of the scene and the car
 
+; Wish list:
 ; WorldState -> WorldState
 ; for each tick of the clock, big-bang obtains the next 
 ; state of the world from (clock-tick-handler cw) 
@@ -26,7 +27,8 @@
  
 ; WorldState -> Boolean
 ; after each event, big-bang evaluates (end? cw) 
-(define (end? cw) ...)
+;(define (end? cw) ...)
+; Wish list end
 
 ; constants to represent the car and scene
 (define WIDTH-OF-WORLD 200)
@@ -60,6 +62,13 @@
    (place-image CAR (+ 20 x) 20 (empty-scene 200 30)))
 
 
+; WorldState -> Number
+; stops the car when it reaches the end of the emtpy scene
+(define (end? cw)
+  (if (= cw (- (image-width (empty-scene 200 30)) (image-width CAR)))
+      #true
+      #false))
+
 ; WorldState -> Image
 ; places the image of the car x pixels from
 ; the left margin of the BACKGROUND image
@@ -69,11 +78,13 @@
 ; WorldState -> WorldState
 ; adds 3 to x to move the car right
 (define (tock x)
-  (+ x 3))
+  (+ x 2))
 
 ; WorldState -> WorldState
 ; launches the program from some initial state
 (define (main ws)
   (big-bang ws
     [on-tick tock]
-    [to-draw render]))
+    [stop-when end?]
+    [to-draw render]
+    ))
