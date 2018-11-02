@@ -40,7 +40,6 @@
   (circle WHEEL-RADIUS "solid" "black"))
 
 (define SPACE
- ; (rectangle 10 WHEEL-RADIUS "solid" "white"))
   (rectangle (* WHEEL-RADIUS 2) WHEEL-RADIUS "solid" "white"))
 
 (define BOTH-WHEELS
@@ -50,16 +49,12 @@
 (define CAR-COLOR "red")
 
 (define CAR-BODY
-  ;(rectangle 40 10 CAR-OUTLINE CAR-COLOR))
   (rectangle (* WHEEL-RADIUS 8) (* WHEEL-RADIUS 2) CAR-OUTLINE CAR-COLOR))
 
 (define CAR-TOP
-  ;(rectangle 20 10 CAR-OUTLINE CAR-COLOR))
   (rectangle (* WHEEL-RADIUS 4) (* WHEEL-RADIUS 2) CAR-OUTLINE CAR-COLOR))
 
 (define CAR
-  ;(overlay/xy BOTH-WHEELS -5 -10
-  ;            (overlay/xy CAR-TOP -10 5 CAR-BODY)))
   (overlay/xy BOTH-WHEELS (* WHEEL-RADIUS -1) (* WHEEL-RADIUS -2)
               (overlay/xy CAR-TOP (* WHEEL-RADIUS -2) WHEEL-RADIUS CAR-BODY)))
 
@@ -67,12 +62,8 @@
   (empty-scene (* WHEEL-RADIUS 40) (* WHEEL-RADIUS 6)))
 
 (define (BACKGROUND x)
-   ;(place-image CAR (+ 20 x) 20 (empty-scene 200 30)))
   (place-image CAR (+ (* WHEEL-RADIUS 4)  x) (* WHEEL-RADIUS 4)
-               ;(empty-scene (* WHEEL-RADIUS 40) (* WHEEL-RADIUS 6))))
                SCENE))
-
-
 
 
 ; WorldState -> Number
