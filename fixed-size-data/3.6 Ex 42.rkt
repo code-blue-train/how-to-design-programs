@@ -1,13 +1,14 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-beginner-reader.ss" "lang")((modname |3.6|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname |3.6 Ex 42|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 
 (require 2htdp/image)
 (require 2htdp/universe)
-; exercise 41
+; exercise 42
 ; A WorldState is a Number
 ; intepretation is the number of pixels between
-; the left border of the scene and the car
+; the x-coordinate of the right-most edge of the car
+; and the left border of the scene
 
 ; Wish list:
 ; WorldState -> WorldState
@@ -34,7 +35,7 @@
 ; constants to represent the car and scene
 ; changing WHEEL-RADIUS will change the dimensions of the CAR and SCENE
 ; exercise 39
-(define WHEEL-RADIUS 5)
+(define WHEEL-RADIUS 15)
 (define WHEEL-DISTANCE (* WHEEL-RADIUS 5))
 
 (define WHEEL
@@ -59,11 +60,14 @@
   (overlay/xy BOTH-WHEELS (* WHEEL-RADIUS -1) (* WHEEL-RADIUS -2)
               (overlay/xy CAR-TOP (* WHEEL-RADIUS -2) WHEEL-RADIUS CAR-BODY)))
 
-(define SCENE
-  (empty-scene (* WHEEL-RADIUS 40) (* WHEEL-RADIUS 6)))
-
 (define Y-CAR
   (* WHEEL-RADIUS 4))
+
+(define CAR-WIDTH
+  (image-width CAR))
+
+(define SCENE
+  (empty-scene (* WHEEL-RADIUS 40) (* WHEEL-RADIUS 6)))
 
 (define TREE-BUSH
   (circle  WHEEL-RADIUS "solid" "green"))
@@ -82,7 +86,7 @@
 ; WorldState -> Number
 ; stops the car when it reaches the end of the emtpy scene
 (define (end? ws)
-  (if (> ws (+ (image-width BACKGROUND) (/ (image-width CAR) 2)))
+  (if (> ws (+ (image-width BACKGROUND) (* 1.5 CAR-WIDTH)))
       #true
       #false))
 
@@ -95,7 +99,7 @@
   (place-image TREE
                (/ (image-width BACKGROUND) 2)
                (-  (image-height BACKGROUND) (/ (image-height TREE) 2))
-               (place-image CAR ws Y-CAR BACKGROUND)))
+               (place-image CAR (- ws CAR-WIDTH) Y-CAR BACKGROUND)))
 
 ; WorldState -> WorldState
 ; adds 2 to x to move the car right
