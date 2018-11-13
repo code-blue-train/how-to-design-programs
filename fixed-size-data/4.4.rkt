@@ -24,16 +24,16 @@
 ; when y is above 1/3 of canvas display "Descending"
 ; when y is below 1/3 of canvas display "Closing in"
 ; when y is other display "Landed"
-(check-expect (status-line 5) (text "Descending" 12 "blue"))
-(check-expect (status-line 50) (text "Closing in" 12 "red"))
-(check-expect (status-line 101) (text "Landed" 12 "green"))
+(check-expect (status-line 5) (text "Descending" 12 "green"))
+(check-expect (status-line 50) (text "Closing in" 12 "orange"))
+(check-expect (status-line 101) (text "Landed" 12 "red"))
 (define (status-line y)
   (cond
-    [(< y (* HEIGHT .3)) (text "Descending" 12 "blue")]
-    [(and (> y (* HEIGHT .3)) (< y HEIGHT)) (text "Closing in" 12 "red")]
-    [else (text "Landed" 12 "green")]
+    [(<= 0 y CLOSE) (text "Descending" 12 "green")]
+    [(and (< CLOSE y) (<= y HEIGHT)) (text "Closing in" 12 "orange")]
+    [(> y HEIGHT) (text "Landed" 12 "red")]
     ))
-    
+   
 
 ; WorldState -> WorldState
 ; computes next location of UFO 
@@ -46,4 +46,4 @@
 ;(check-expect (render 11) (place-image UFO (/ (image-width MTSCN) 2) 11 MTSCN))
 (define (render y)
   (place-image UFO (/ (image-width MTSCN) 2) y
-               (overlay/align "right" "bottom" (status-line y) MTSCN)))
+               (overlay/xy (status-line y) 20 20 MTSCN)))
