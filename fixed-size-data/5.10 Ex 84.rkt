@@ -42,7 +42,7 @@
 (define ex2 (make-editor "hell" "world"))
 (check-expect (edit ex2 "o") (make-editor "hello " "world"))
 (define ex3 (make-editor "hello " "world"))
-(check-expect (edit ex3 "\b") (make-editor "helloworld"))
+(check-expect (edit ex3 "\b") (make-editor "hello" "world"))
 (define ex4 (make-editor "hello" "world"))
 (check-expect (edit ex4 " ") (make-editor "hello " "world"))
 (define ex5 (make-editor "hello " "world"))
