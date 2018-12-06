@@ -1,6 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-beginner-reader.ss" "lang")((modname |5.10 Ex 84|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname |5.10 Ex 86|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 (require 2htdp/image)
 (require 2htdp/universe)
 
@@ -36,6 +36,9 @@
 ; wish list
 ; string-first - consumes string and returns first character
 ; string-last - consumes string and returns last character
+; string-remove-last - consumes string and returns the string with the last character removed
+(define (string-remove-last s)
+  (substring s 0 (- (string-length s) 1)))
 
 ; Editor KeyEvent -> Editor
 ; intepretation consumes an editor ed and a keyevent ke
@@ -77,14 +80,12 @@
 (check-expect (edit ex12 "right") (make-editor "hellow" "orld"))
 
 (define (edit ed ke)
-  (if (< (image-width (text (editor-pre ed) 16 "black")) 100)
-  (cond
-
-        
+  (cond      
     [(or (string=? ke "\t") (string=? ke "\r")) ed]
     [(string=? ke "\b")
      (make-editor
-       (substring (editor-pre ed) 0 (- (string-length (editor-pre ed)) 1)) (editor-post ed))]
+       ;(substring (editor-pre ed) 0 (- (string-length (editor-pre ed)) 1)) (editor-post ed))]
+      (string-remove-last (editor-pre ed)) (editor-post ed))]
     [(= (string-length ke) 1)
      (make-editor (string-append (editor-pre ed) ke) (editor-post ed))]
     [(string=? ke "left")
@@ -98,7 +99,7 @@
        (editor-pre ed) (substring (editor-post ed) 0 1))
        (substring (editor-post ed) 1 (string-length (editor-post ed))))]
     [else ed]
-    ) ed))
+    ))
 
 ; Editor -> Editor
 ; (run (make-editor String String))
