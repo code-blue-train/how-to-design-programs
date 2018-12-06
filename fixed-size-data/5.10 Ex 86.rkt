@@ -34,11 +34,79 @@
                  MTSCN))
 
 ; wish list
+
+; String -> String
 ; string-first - consumes string and returns first character
+(define (string-first s)
+  (substring s 0 1))
+
+; String -> String
 ; string-last - consumes string and returns last character
+(define (string-last s)
+  (substring s (- (string-length s) 1)))
+
+; String -> String
+; consumes string and return string with first character removed
+(define (string-remove-first s)
+  (substring s 1 (string-length s)))
+
+; Editor -> Editor
+; moves cursor fo the left when "left" key is pressed
+(define (cursor-left ed)
+  (cond
+    [(string=? "" (editor-pre ed)) ed]
+    [else
+     (make-editor
+      (string-remove-last (editor-pre ed))
+      (string-append (string-last (editor-pre ed)) (editor-post ed)))]))
+  
+; Editor -> Editor
+; moves cursor to the right when "right" key
+(define (cursor-right ed)
+  (cond
+    [(string=? (editor-post ed) "") ed]
+    [else
+     (make-editor
+      (string-append (editor-pre ed) (string-first (editor-post ed)))
+      (string-remove-first (editor-post ed)))]))
+
+
+; Editor -> Editor
+; and returns ed with character apended to end of first string
+(define (string-add-char ke ed)
+  (make-editor (string-append (editor-pre ed) ke) (editor-post ed)))
+
+; String -> String
+; consumes a string and returns the last character of the string
+(define (string-select-last s)
+  (substring s (- (string-length s) 1)))
+
+; Editor -> Editor
 ; string-remove-last - consumes string and returns the string with the last character removed
 (define (string-remove-last s)
   (substring s 0 (- (string-length s) 1)))
+
+; Editor -> Editor
+; consumes editor structure and returns deletes the left-most character
+; from the first string
+(define (delete-left ed)
+  (cond
+    [(string=? (editor-pre ed) "") ed]
+    [else (make-editor (string-remove-last (editor-pre ed)) (editor-post ed))]
+    ))
+
+;
+; if image-width of right string reaches width of MTSCN
+; then ignore key events
+; Editor KeyEvent -> Editor
+(define (right-size-limit ke ed)
+  (cond
+    [(> (image-width (render (string-add-char ke ed))) 50) ed]
+    [else
+     (string-add-char ke ed)]))
+
+; Image -> Number
+; consumes image and returns its width
 
 ; Editor KeyEvent -> Editor
 ; intepretation consumes an editor ed and a keyevent ke
@@ -80,24 +148,12 @@
 (check-expect (edit ex12 "right") (make-editor "hellow" "orld"))
 
 (define (edit ed ke)
-  (cond      
+  (cond
     [(or (string=? ke "\t") (string=? ke "\r")) ed]
-    [(string=? ke "\b")
-     (make-editor
-       ;(substring (editor-pre ed) 0 (- (string-length (editor-pre ed)) 1)) (editor-post ed))]
-      (string-remove-last (editor-pre ed)) (editor-post ed))]
-    [(= (string-length ke) 1)
-     (make-editor (string-append (editor-pre ed) ke) (editor-post ed))]
-    [(string=? ke "left")
-        (make-editor
-         (substring (editor-pre ed) 0 (- (string-length (editor-pre ed)) 1))
-         (string-append
-          (substring (editor-pre ed) (- (string-length (editor-pre ed)) 1)) (editor-post ed)))]
-    [(string=? ke "right")
-     (make-editor
-      (string-append
-       (editor-pre ed) (substring (editor-post ed) 0 1))
-       (substring (editor-post ed) 1 (string-length (editor-post ed))))]
+    [(string=? ke "\b") (delete-left ed)]
+    [(= (string-length ke) 1) (string-add-char ke ed)]
+    [(string=? ke "left") (cursor-left ed)]
+    [(string=? ke "right") (cursor-right ed)]
     [else ed]
     ))
 
