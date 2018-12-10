@@ -180,3 +180,4 @@
          (= (ufo-imh-proximity (fired-ufo s)) HEIGHT)) #true]
     [else #false]))
 ; ufo reaches bottom of scene
+; add line to force change
