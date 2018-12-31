@@ -1,6 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-beginner-reader.ss" "lang")((modname |6.2 Ex 106|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname |6.2 Ex 107|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 (require 2htdp/universe)
 (require 2htdp/image)
 
@@ -18,30 +18,62 @@
           (empty-scene (/ MTSCN-WIDTH 3) MTSCN-HEIGHT "white")
           (empty-scene (/ MTSCN-WIDTH 3) MTSCN-HEIGHT "blue")))
 
-; gauge dimensions
-(define GAUGE-WIDTH (/ (image-width MTSCN) 2))
-(define GAUGE-HEIGHT (/ (image-height MTSCN) 3))
+; happiness gauge
+(define GAUGE-WIDTH 180)
+(define GAUGE-HEIGHT 50)
 (define GAUGE
   (rectangle GAUGE-WIDTH GAUGE-HEIGHT "solid" "black"))
 (define GAUGE-DECREASE-PIXEL 1)
 (define GAUGE-INCREASE-PIXEL 5)
 
+(define X-MOVE-PIXEL 1)
 ; chameleon
 (define CHAM (bitmap "cham.png"))
 
-(define CHAM-DEFAULT-COLOR "g")
 (define CHAM-WIDTH (image-width CHAM))
 (define CHAM-HEIGHT (image-height CHAM))
+(define CHAM-X-MOVE-PIXEL 1)
+
+(define CHAM-GAUGE-WIDTH 180)
+(define CHAM-GAUGE-HEIGHT 50)
+(define CHAM-GAUGE
+  (rectangle CHAM-GAUGE-WIDTH CHAM-GAUGE-HEIGHT "solid" "black"))
+(define CHAM-GAUGE-DEC-PIXEL 1)
+(define CHAM-GAUGE-INC-PIXEL 5)
+(define CHAM-LABEL (text "CHAM HAPPINESS GAUGE" 14 "red"))
 
 ; cat
 (define CAT (bitmap "cat.png"))
 
 (define CAT-WIDTH (image-width CAT))
 (define CAT-HEIGHT (image-height CAT))
-(define CAT-DEFAULT-DIR "right")
+(define CAT-X-MOVE-PIXEL 1)
+  
+(define CAT-GAUGE-WIDTH 180)
+(define CAT-GAUGE-HEIGHT 50)
+(define CAT-GAUGE
+  (rectangle CAT-GAUGE-WIDTH CAT-GAUGE-HEIGHT "solid" "black"))
+(define CAT-GAUGE-DEC-PIXEL 1)
+(define CAT-GAUGE-INC-PIXEL 5)
+(define CAT-LABEL (text "CAT HAPPINESS GAUGE" 14 "red"))
 
-; vanimal
-(define X-MOVE-PIXEL 1)
+(define GAUGES-MTSCN
+  (place-image
+   CAT-GAUGE
+   100 50
+   (place-image
+    CHAM-GAUGE
+    300 50
+    MTSCN)))
+
+(define GAUGES-LABELS-MTSCN
+  (place-image
+   CAT-LABEL
+   100 9
+   (place-image
+    CHAM-LABEL
+    300 9
+    GAUGES-MTSCN)))
 
 ; VCham is a structure
 ;  (make-VCham Number Number)
@@ -56,28 +88,19 @@
 (define cham-ex3 (make-VCham 50 0))
 
 ; VCat is a structure
-;  (make-VCat Number Number String)
+;  (make-VCat Number Number)
 ; intepretation:
 ; VCat-x represents the x coordinate of the cat on the canvas
 ; VCat-h represents the cat's happiness level and is a number between 0 and 100
 ; - 0 miserable
 ; - 50 soso
 ; - 100 ecstatic
-; VCat-d represents direction on MTSCN
-; "right" or "left"
-(define-struct VCat [x h d])
-(define cat-ex1 (make-VCat 100 5 "left"))
-(define cat-ex2 (make-VCat 0 100 "right"))
-(define cat-ex3 (make-VCat 50 0 "right"))
 
-(define-struct VCat.v2 [x h])
+(define-struct VCat [x h])
 
-; A VAnimal is either
-; – a VCat
-; – a VCham
-
-(define VA1 cat-ex1)
-(define VA2 cham-ex1)
+; a Zoo is a structure with a VCat and a VCham
+; (make-zoo (make-VCat 0 100) (make-VCham 0 100))
+(define-struct zoo [VCat VCham])
 
 ; design cat-cham world program. Given both a location and an animal, it walks the latter
 ; across the canvas, start from the given location
@@ -176,7 +199,7 @@
               
 (define (render va)
   (cond
-    [(VCat.v2? va) (render-vanimal "CAT" (VCat.v2-x va) (VCat.v2-h va))]                                    
+    [(VCat? va) (render-vanimal "CAT" (VCat-x va) (VCat-h va))]                                    
     [(VCham? va) (render-vanimal "CHAM" (VCham-x va) (VCham-h va))]
     )
   )
@@ -184,14 +207,14 @@
 ; function for handling clock ticks, from VAnimal to VAnimal
 ; VAnimal -> VAnimal
 ; interpretation each clock tick moves the VAnimal va across the scene
-(check-expect (tock (make-VCat.v2 100 100))
-              (make-VCat.v2 101 99))
+(check-expect (tock (make-VCat 100 100))
+              (make-VCat 101 99))
                     
 (define (tock va)
   (cond
-    [(VCat.v2? va)
-     (make-VCat.v2 (va-move (VCat.v2-x va))
-                   (dec-h-gauge (VCat.v2-h va)))]
+    [(VCat? va)
+     (make-VCat (va-move (VCat-x va))
+                   (dec-h-gauge (VCat-h va)))]
     [(VCham? va)
      (make-VCham (va-move (VCham-x va))
                  (dec-h-gauge (VCham-h va)))]
@@ -207,8 +230,8 @@
   (cond
     [(or (string=? "up" ke) (string=? "down" ke))
      (cond
-        [(VCat.v2? va)
-         (make-VCat.v2 (VCat.v2-x va) (inc-h-gauge (VCat.v2-h va)))]
+        [(VCat? va)
+         (make-VCat (VCat-x va) (inc-h-gauge (VCat-h va)))]
         [(VCham? va)
          (make-VCham (VCham-x va) (inc-h-gauge (VCham-h va)))]
         )]
@@ -219,10 +242,10 @@
 ; intepretation returns false when animal va happiness gauge is 0
 ; else returns true
 (define (va-h-zero va)
-  (if (or (and (VCham? va) (= (VCham-h va) 0)) (and (VCat.v2? va) (= (VCat.v2-h va) 0))) #true #false))
+  (if (or (and (VCham? va) (= (VCham-h va) 0)) (and (VCat? va) (= (VCat-h va) 0))) #true #false))
                 
 ; WorldState is VCham vc
-; (cat-cham (make-VCat.v2 0 GAUGE-WIDTH))
+; (cat-cham (make-VCat 0 GAUGE-WIDTH))
 (define (cat-cham va)
   (big-bang va
     [on-tick tock]
