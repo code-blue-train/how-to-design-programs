@@ -32,7 +32,7 @@
 
 (define CHAM-WIDTH (image-width CHAM))
 (define CHAM-HEIGHT (image-height CHAM))
-(define CHAM-X-MOVE-PIXEL 1)
+(define CHAM-X-MOVE-PIXEL 5)
 
 (define CHAM-GAUGE-WIDTH 180)
 (define CHAM-GAUGE-HEIGHT 50)
@@ -57,23 +57,27 @@
 (define CAT-GAUGE-INC-PIXEL 5)
 (define CAT-LABEL (text "CAT HAPPINESS GAUGE" 14 "red"))
 
-(define GAUGES-MTSCN
+(define SCENE-TEMPLATE
   (place-image
-   CAT-GAUGE
+   (overlay/xy
+   (rectangle 175 CAT-GAUGE-HEIGHT "solid" "red")
+   0 0
+   (rectangle CAT-GAUGE-WIDTH CAT-GAUGE-HEIGHT "solid" "black"))
    100 50
    (place-image
-    CHAM-GAUGE
+    (overlay/xy
+     (rectangle 175 CHAM-GAUGE-HEIGHT "solid" "red")
+     0 0
+     (rectangle CHAM-GAUGE-WIDTH CAT-GAUGE-HEIGHT "solid" "black"))
     300 50
-    MTSCN)))
-
-(define GAUGES-LABELS-MTSCN
-  (place-image
-   CAT-LABEL
-   100 9
-   (place-image
-    CHAM-LABEL
-    300 9
-    GAUGES-MTSCN)))
+    (place-image
+     CAT
+     0 (- MTSCN-HEIGHT (/ CAT-HEIGHT 2))
+     (place-image
+      CHAM
+      100 (- MTSCN-HEIGHT (/ CHAM-HEIGHT 2))
+      MTSCN))))
+  )
 
 ; VCham is a structure
 ;  (make-VCham Number Number)
@@ -102,69 +106,41 @@
 ; (make-zoo (make-VCat 0 100) (make-VCham 0 100))
 (define-struct zoo [VCat VCham])
 
+; test structures
+(define zoo-init (make-zoo
+                  (make-VCat 0 CAT-GAUGE-WIDTH)
+                  (make-VCham 100 CHAM-GAUGE-WIDTH)))
+
 ; design cat-cham world program. Given both a location and an animal, it walks the latter
 ; across the canvas, start from the given location
 
 ; wish list
+; world program that takes zoo structure
+; move cat and cham (clock tick)
+; pet cat (key event)
+; feed cham (key event)
+
 
 ; Number -> Number
-; intepretation consumes number x which is the animal's x-position
-; and moves the animal right across the scene by X-MOVE-PIXEL
+; intepretation consumes animal type t (cat or cham) and number x which is the animal's x-position
+; and moves the animal right across the scene by CAT-X-MOVE-PIXEL or CHAM-X-MOVE-PIXEL
 ; on the x-axis. if animal reaches right end of the scene, the animal restarts at 0 x-position
-(check-expect (va-move 0) 1)
-(check-expect (va-move 100) 101)
-(check-expect (va-move MTSCN-WIDTH) 0)
-(define (va-move x)
+(check-expect (va-move "cat" 0) 1)
+(check-expect (va-move "cham" 100) 101)
+(check-expect (va-move "cat" MTSCN-WIDTH) 0)
+(define (va-move t x)
   (cond
-    [(< x MTSCN-WIDTH) (+ x X-MOVE-PIXEL)]
-    [else 0])
-  )
+    [(string=? t "cat")
+     (cond
+       [(< x MTSCN-WIDTH) (+ x CAT-X-MOVE-PIXEL)]
+       [else 0])]
+    [(string=? t "cham")
+     (cond
+       [(< x MTSCN-WIDTH) (+ x CHAM-X-MOVE-PIXEL)]
+       [else 0])]
+   ))
+
    
-
-; Number -> Image
-; intepretation consumes number x and produces an image
-; that overlay's a red retangle with x as its x-coordinate on the GAUGE image
-(check-expect (decrease-gauge 100)
-              (overlay/align "left" "middle"
-                             (rectangle 100 GAUGE-HEIGHT "solid" "red")
-                                        GAUGE))
-(check-expect (decrease-gauge 0)
-              (overlay/align "left" "middle"
-                             (rectangle 0 GAUGE-HEIGHT "solid" "red")
-                                        GAUGE))
-(define (decrease-gauge x)
-  (overlay/align "left" "middle"
-                 (rectangle x GAUGE-HEIGHT "solid" "red")
-                 GAUGE))
-
-; Type X-pos Happiness Color -> Image
-; intepretation consumes Type t (either CAT or CHAM), x-position x, happiness level h, and
-; color (white for cat) and
-(check-expect (render-vanimal "CAT" 100 100)
-              (place-image
-               (overlay/align "left" "middle"
-                 (rectangle 100 GAUGE-HEIGHT "solid" "red")
-                 GAUGE)
-               200 35
-               (place-image CAT 100 (- MTSCN-HEIGHT (/ CAT-HEIGHT 2)) MTSCN)))
-(check-expect (render-vanimal "CHAM" 5 100)
-              (place-image
-               (overlay/align "left" "middle"
-                 (rectangle 100 GAUGE-HEIGHT "solid" "red")
-                 GAUGE)
-               200 35
-               (place-image CHAM 5 (- MTSCN-HEIGHT (/ CHAM-HEIGHT 2)) COLORED-SCENE)))
-
-(define (render-vanimal t x h)
-  (cond
-    [(string=? t "CAT")
-    (place-image (decrease-gauge h) 200 35
-               (place-image CAT x (- MTSCN-HEIGHT (/ CAT-HEIGHT 2)) MTSCN))]
-    [(string=? t "CHAM")
-    (place-image (decrease-gauge h) 200 35
-               (place-image CHAM x (- MTSCN-HEIGHT (/ CHAM-HEIGHT 2)) COLORED-SCENE))]
-    ))
-              
 ; Number -> Number
 ; intepretation consumes number h which is the current happiness level for the animal
 ; and returns number which is the happiness gauge increased by GAUGE-INCREASE-PIXEL
@@ -191,65 +167,101 @@
    (- h GAUGE-DECREASE-PIXEL)
    ))
 
-; scene rendering example
-; VAnimal -> Image
-; intepretation consumes a VAnimal va and produces an image
-; with a CAT or a CHAM on the scene depending on the va
-; image rendering testing happens in render-vanimal
-              
-(define (render va)
-  (cond
-    [(VCat? va) (render-vanimal "CAT" (VCat-x va) (VCat-h va))]                                    
-    [(VCham? va) (render-vanimal "CHAM" (VCham-x va) (VCham-h va))]
-    )
-  )
+
+; scene rendering
+
+; Zoo -> Image
+; intepretation consumes a zoo structure and renders cat and cham images based on
+; their x position and the happiness gauge values on the MTSCN
+(check-expect (render zoo-init)
+              (place-image
+               (overlay/xy
+                (rectangle CAT-GAUGE-WIDTH CAT-GAUGE-HEIGHT "solid" "red")
+                0 0
+                (rectangle CAT-GAUGE-WIDTH CAT-GAUGE-HEIGHT "solid" "black"))
+               100 50
+               (place-image
+                (overlay/xy
+                 (rectangle CHAM-GAUGE-WIDTH CHAM-GAUGE-HEIGHT "solid" "red")
+                 0 0
+                 (rectangle CHAM-GAUGE-WIDTH CHAM-GAUGE-HEIGHT "solid" "black"))
+                300 50
+                (place-image
+                 CAT
+                 0 (- MTSCN-HEIGHT (/ CAT-HEIGHT 2))
+                 (place-image
+                  CHAM
+                  100 (- MTSCN-HEIGHT (/ CHAM-HEIGHT 2))
+                  MTSCN)))))
+       
+(define (render zoo)
+  (place-image
+   (overlay/xy
+   (rectangle (VCat-h (zoo-VCat zoo)) CAT-GAUGE-HEIGHT "solid" "red")
+   0 0
+   (rectangle CAT-GAUGE-WIDTH CAT-GAUGE-HEIGHT "solid" "black"))
+   100 50
+   (place-image
+    (overlay/xy
+     (rectangle (VCham-h (zoo-VCham zoo)) CHAM-GAUGE-HEIGHT "solid" "red")
+     0 0
+     (rectangle CHAM-GAUGE-WIDTH CAT-GAUGE-HEIGHT "solid" "black"))
+    300 50
+    (place-image
+     CAT
+     (VCat-x (zoo-VCat zoo)) (- MTSCN-HEIGHT (/ CAT-HEIGHT 2))
+     (place-image
+      CHAM
+      (VCham-x (zoo-VCham zoo)) (- MTSCN-HEIGHT (/ CHAM-HEIGHT 2))
+      MTSCN)))))
+                     
 
 ; function for handling clock ticks, from VAnimal to VAnimal
-; VAnimal -> VAnimal
-; interpretation each clock tick moves the VAnimal va across the scene
-(check-expect (tock (make-VCat 100 100))
-              (make-VCat 101 99))
-                    
-(define (tock va)
-  (cond
-    [(VCat? va)
-     (make-VCat (va-move (VCat-x va))
-                   (dec-h-gauge (VCat-h va)))]
-    [(VCham? va)
-     (make-VCham (va-move (VCham-x va))
-                 (dec-h-gauge (VCham-h va)))]
-    )
-  )
+; Zoo -> Zoo
+; interpretation consumes zoo structure and returns zoo structure
+; calls va-move which moves animals on x-axis and calls dec-h-gauge which
+; decreases happiness gauge
+(check-expect (tock (make-zoo (make-VCat 50 100) (make-VCham 40 50)))
+              (make-zoo (make-VCat 51 99) (make-VCham 41 49)))
+(define (tock zoo)
+  (make-zoo
+   (make-VCat (va-move "cat" (VCat-x (zoo-VCat zoo)))
+              (dec-h-gauge (VCat-h (zoo-VCat zoo))))
+   (make-VCham (va-move "cham" (VCham-x (zoo-VCham zoo)))
+              (dec-h-gauge (VCham-h (zoo-VCham zoo))))
+   ))
+                      
 
 ; a fuction for dealing with key events so that you can feed and pet and colorize your animal
-; VAnimal -> VAnimal
+; Zoo KeyEvent -> VAnimal
 ; intepretation
-; - up or down arrow increases animal's va happiness
+; - up or down arrow increases animals in zoo's happiness
 ; - pets cat or feeds chameleon
-(define (key-events va ke)
+(define (key-events zoo ke)
   (cond
     [(or (string=? "up" ke) (string=? "down" ke))
-     (cond
-        [(VCat? va)
-         (make-VCat (VCat-x va) (inc-h-gauge (VCat-h va)))]
-        [(VCham? va)
-         (make-VCham (VCham-x va) (inc-h-gauge (VCham-h va)))]
-        )]
-    [else va]
-    ))
+     (make-zoo
+      (make-VCat (VCat-x (zoo-VCat zoo)) (inc-h-gauge (VCat-h (zoo-VCat zoo))))
+      (make-VCham (VCham-x (zoo-VCham zoo)) (inc-h-gauge (VCham-h (zoo-VCham zoo)))))]
+     [else zoo]
+     ))
+   
 
-; VAnimal -> Boolean
-; intepretation returns false when animal va happiness gauge is 0
-; else returns true
-(define (va-h-zero va)
-  (if (or (and (VCham? va) (= (VCham-h va) 0)) (and (VCat? va) (= (VCat-h va) 0))) #true #false))
+; Zoo -> Boolean
+; intepretation returns true when either animal in zoos happiness gauge is 0
+; else returns false
+(check-expect (zoo-h-zero (make-zoo (make-VCat 100 0) (make-VCham 200 100))) #true)
+(check-expect (zoo-h-zero (make-zoo (make-VCat 100 10) (make-VCham 200 100))) #false)
+(define (zoo-h-zero zoo)
+  (or (= (VCham-h (zoo-VCham zoo)) 0) (= (VCat-h (zoo-VCat zoo)) 0))
+  )
                 
 ; WorldState is VCham vc
-; (cat-cham (make-VCat 0 GAUGE-WIDTH))
-(define (cat-cham va)
-  (big-bang va
+; (cham-and-cat (make-zoo (make-VCat 0 CAT-GAUGE-WIDTH) (make-VCham 100 CHAM-GAUGE-WIDTH)))
+(define (cham-and-cat zoo)
+  (big-bang zoo
     [on-tick tock]
     [on-draw render]
     [on-key key-events]
-    [stop-when va-h-zero]
+    [stop-when zoo-h-zero]
     ))        
