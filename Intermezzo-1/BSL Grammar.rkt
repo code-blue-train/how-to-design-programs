@@ -32,15 +32,15 @@ number?
 ; Exercise 118
 ; why are they valid?
 (define (f x) x)
-; the application function f is valid as it is a variable
+; the function definition f is valid as it is a variable
 ; with a valid variable/expression x
 
 (define (f x) y)
-; the application function f is valid as it is a variable
+; the function definition f is valid as it is a variable
 ; with valid variable/expressions x and y
 
 (define (f x y) 3)
-; the application function f is valid as it is a variable
+; the function definition f is valid as it is a variable
 ; with valid expressions x and y
 ; and value 3 is a valid expression
 
@@ -50,7 +50,7 @@ number?
 ; "x" is not a valid expression
 
 (define (f x y z) (x))
-; the expression (x) of function application f cannot start with an open parenthesis
+; the expression (x) of function defintion f cannot start with an open parenthesis
 
 ; exercise 120. Discriminate the legal from the illegal sentences:
 (x)
