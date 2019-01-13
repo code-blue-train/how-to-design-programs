@@ -71,12 +71,42 @@
    (/ (image-height BACKGROUND) 2)
    BACKGROUND))
 
+(define LH-AREA (* (image-width LECTURE-HALL) (image-height LECTURE-HALL)))
 
-; List-of-posn -> Image
+; A NEList-of-posn is one of:
+; (cons posn)
+; (cons posn List-of-posn)
+; interpretation non-empty list of posns
+
+; NEList-of-posn -> Image
 ; intepretation consumes a list of Posn whose coordinates fit
 ; into the dimensions of the lecture hall.
 ; it produces an image of the lecture hall with red dots added as specified by the Posns.
+(check-expect (add-balloons (cons (make-posn 10 10) '()))
+              (place-image
+               BALLOON (posn-x (make-posn 10 10)) (posn-y (make-posn 10 10))
+               LECTURE-HALL))
+(check-expect (add-balloons (cons (make-posn 10 10) (cons (make-posn 22 55) '())))
+              (place-image
+               BALLOON (posn-x (make-posn 10 10)) (posn-y (make-posn 10 10))
+               (place-image
+                BALLOON (posn-x (make-posn 22 55)) (posn-y (make-posn 22 55))
+                LECTURE-HALL)))
+                
+(define (add-balloons lop)
+  (cond
+   [(empty? lop) LECTURE-HALL]
+   [else (place-image BALLOON (posn-x (first lop)) (posn-y (first lop)) (add-balloons (rest lop)))]))
 
 
-
+(define FINAL-IMAGE
+  (add-balloons   (cons (make-posn 0 0)
+                      (cons (make-posn 10 20)
+                            (cons (make-posn 20 40)
+                                  (cons (make-posn 30 60)
+                                        (cons (make-posn 40 80)
+                                              (cons (make-posn 50 100)
+                                                    (cons (make-posn 60 120)
+                                                          (cons (make-posn 70 140)
+                                                                '()))))))))))
 
