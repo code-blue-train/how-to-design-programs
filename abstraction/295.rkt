@@ -21,7 +21,6 @@
 ; The function generates a predicate that ensures that:
 ; n is the length of list l0
 ; and that all Posns in list l0 are within a WIDTH by HEIGHT rectangle
-;(check-expect [(n-inside-playground?
 (define (n-inside-playground? n)
   (lambda (l0)
     (and

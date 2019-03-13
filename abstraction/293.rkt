@@ -5,6 +5,9 @@
 ; X [List-of X] -> [Maybe [List-of X]]
 ; returns the first sublist of l that starts
 ; with x, #false otherwise
+; i struggled with understanding functions that generate nameless functions
+; and used the solution from https://github.com/code-blue-train/HtDP2e-workthrough
+; for this exercise
 (check-satisfied (find 2 '(1 2 3))
                  (found? 2 '(1 2 3)))
 
