@@ -56,8 +56,40 @@
 (check-within (distance-between 3 4 (make-posn 0 10)) 6.7 .1)
 (define (distance-between x y p)
   (sqrt (+ (sqr (- x (posn-x p))) (sqr (- y (posn-y p))))))
-  
-  
+
+; Number Number Number Number -> Shape
+; represents a width by height rectangle whose
+; upper-left corner is located at (ul-x, ul-y)
+(check-expect (inside? (mk-rect 0 0 10 3)
+                       (make-posn 0 0))
+              #true)
+(check-expect (inside? (mk-rect 2 3 10 3)
+                       (make-posn 4 5))
+              #true)
+(check-expect (inside? (mk-rect 0 0 10 3)
+                       (make-posn 15 5))
+              #false)
+(define (mk-rect ul-x ul-y width height)
+  (lambda (p)
+    (and (<= ul-x (posn-x p) (+ ul-x width))
+         (<= ul-y (posn-y p) (+ ul-y height)))))
+                                
+                       
+; Shape Shape -> Shape
+; combines the two shapes into one
+(define (mk-combination s1 s2)
+  ; Posn -> Boolean
+  (lambda (p)
+    (or (inside? s1 p)
+        (inside? s2 p))))
+
+(define circle1 (mk-circle 3 4 5))
+(define rectangle1 (mk-rect 0 3 10 3))
+(define union1 (mk-combination circle1 rectangle1))
+
+(check-expect (inside? union1 (make-posn 0 0)) #true)
+(check-expect (inside? union1 (make-posn 0 9)) #false)
+(check-expect (inside? union1 (make-posn -1 3)) #true)
 
 
 
