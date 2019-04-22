@@ -3,7 +3,6 @@
 #reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname |310|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 (define-struct no-parent [])
 (define-struct child [father mother name date eyes])
-
 (define NP (make-no-parent))
 ; An FT is one of: 
 ; – NP
@@ -34,5 +33,3 @@
      (+ 1
         (count-persons (child-father an-ftree))
         (count-persons (child-mother an-ftree)))]))
-    
-  
