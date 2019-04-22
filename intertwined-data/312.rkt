@@ -1,8 +1,9 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname |310|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname |312|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 (define-struct no-parent [])
 (define-struct child [father mother name date eyes])
+
 (define NP (make-no-parent))
 ; An FT is one of: 
 ; – NP
@@ -21,15 +22,15 @@
 ; Youngest Generation: 
 (define Gustav (make-child Fred Eva "Gustav" 1988 "brown"))
 
-; FT -> Number
-; consumes a family tree and produces a number that represents the number
-; of children in the family tree
-(check-expect (count-persons Gustav) 5)
-(check-expect (count-persons Carl) 1)
-(define (count-persons an-ftree)
+; FT -> [List-of-Strings]
+; consumes a family tree and produces a list of the eye colors in the tree
+; an eye color may appear more than once
+(check-expect (eye-colors Carl) (list "green"))
+(check-expect (eye-colors Eva) (list "blue" "green" "green"))
+(define (eye-colors ft)
   (cond
-    [(no-parent? an-ftree) 0]
+    [(no-parent? ft) '()]
     [else
-     (+ 1
-        (count-persons (child-father an-ftree))
-        (count-persons (child-mother an-ftree)))]))
+     (append (list (child-eyes ft))
+             (eye-colors (child-mother ft))
+             (eye-colors (child-father ft)))]))
