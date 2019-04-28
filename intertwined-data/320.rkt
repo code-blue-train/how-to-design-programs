@@ -10,8 +10,10 @@
 ; Simplify count again. Consider using lambda.
 
 ; An S-expr is one of: 
-; – Atom
-; – SL
+; - Number
+; - String
+; - Symbol
+; – [List-of S-expr]
  
 ; An SL is one of: 
 ; – '()
@@ -37,29 +39,21 @@
 (check-expect (count 'world 'hello) 0)
 (check-expect (count '(world hello) 'hello) 1)
 (check-expect (count '(((world) hello) hello) 'hello) 2)
-(define (count sexp sy)
-  (local (; S-expression -> Number
-          (define (count sexp)
-            (cond
-              [(atom? sexp) (count-atom sexp)]
-              [else (count-sl sexp)]))
-          ; SL -> Number
-          ; returns the number of sy in an SL
-          (define (count-sl sl)
-            (cond
-              [(empty? sl) 0]
-              [else
-               (+ (count (first sl))
-                  (count-sl (rest sl)))]))
-          ; Atom -> Number
-          ; returns 1 if the atom is a symbol otherwise returns 0
-          (define (count-atom at)
-            (cond
-              [(number? at) 0]
-              [(string? at) 0]
-              [(symbol? at) (if (symbol=? at sy) 1 0)])))
-    (count sexp)))
-
+(define (count sexp sym)
+  (local (; S-expr -> Number
+          ; if S-exp is an atom return 1 otherwise 0
+          (define (count-atom sexp)
+            (if (equal? sexp sym) 1 0))
+          ; S-expr -> Number
+          ; consumes an S-exp sexp and uses foldr to process the sexp list
+          (define (count-list sexp)
+            (foldr (lambda (sexp result)
+                     (+ (count sexp sym) result))
+                   0 sexp)))
+    (cond [(number? sexp) 0]
+          [(string? sexp) 0]
+          [(symbol? sexp) (count-atom sexp)]
+          [(list? sexp) (count-list sexp)])))
 
 
 
